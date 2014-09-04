@@ -9,7 +9,7 @@ describe Api::TasksController do
 
     before { sign_in(user) }
 
-    describe "#index" do
+    describe "GET index" do
       it "should return json of those tasks" do
         get :index, task_list_id: task_list.id
         tasks = JSON.parse(response.body)
@@ -22,7 +22,7 @@ describe Api::TasksController do
       end
     end
 
-    describe "#create" do
+    describe "GET create" do
       let(:post_create) do
         post :create, task_list_id: task_list.id, description: "New task"
       end
@@ -44,7 +44,7 @@ describe Api::TasksController do
       end
     end
 
-    describe "#update" do
+    describe "GET update" do
       let(:patch_update) do
         patch :update, task_list_id: task_list, id: task1.id,
           description: "New description", priority: 1, completed: true
@@ -59,6 +59,22 @@ describe Api::TasksController do
 
       it "should return 200 OK" do
         patch_update
+        response.should be_success
+      end
+    end
+
+    describe "GET destroy" do
+      let(:delete_destroy) do
+        delete :destroy, task_list_id: task_list, id: task1.id
+      end
+
+      it "should remove the task from the database" do
+        delete_destroy
+        expect { task1.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it "should return 200 OK" do
+        delete_destroy
         response.should be_success
       end
     end
