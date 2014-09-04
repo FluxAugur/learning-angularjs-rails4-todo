@@ -9,7 +9,7 @@ describe Api::TasksController do
 
     before { sign_in(user) }
 
-    describe "GET index" do
+    describe "#index" do
       it "should return json of those tasks" do
         get :index, task_list_id: task_list.id
         tasks = JSON.parse(response.body)
@@ -20,9 +20,15 @@ describe Api::TasksController do
             'priority' => nil, 'due_date' => nil, 'completed' => false}
         ]
       end
+
+      it "should raise RecordNotFound when trying to get tasks for non-existent list" do
+        expect {
+          get :index, task_list_id: 0
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
 
-    describe "GET create" do
+    describe "#create" do
       let(:post_create) do
         post :create, task_list_id: task_list.id, task: {description: "New task"}
       end
@@ -60,7 +66,7 @@ describe Api::TasksController do
 
       it "should ignore unknown parameters" do
         post :create, task_list_id: task_list.id,
-          task: {description: "New task", foobar: 1324}
+          task: {description: "New task", foobar: 1234}
         response.should be_ok
       end
 
@@ -71,7 +77,7 @@ describe Api::TasksController do
       end
     end
 
-    describe "GET update" do
+    describe "#update" do
       let(:patch_update) do
         patch :update, task_list_id: task_list.id, id: task1.id,
           task: {description: "New description", priority: 1, completed: true}
@@ -88,14 +94,21 @@ describe Api::TasksController do
         patch_update
         response.should be_success
       end
+
+      it "should raise RecordNotFound when trying to update non-existent task" do
+        expect {
+          patch :update, task_list_id: task_list.id, id: 0,
+            task: {description: "New description", priority: 1, completed: true}
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
 
-    describe "GET destroy" do
+    describe "#destroy" do
       let(:delete_destroy) do
         delete :destroy, task_list_id: task_list, id: task1.id
       end
 
-      it "should remove the task from the database" do
+      it "should remove the task from database" do
         delete_destroy
         expect { task1.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
@@ -104,10 +117,17 @@ describe Api::TasksController do
         delete_destroy
         response.should be_success
       end
+
+      it "should raise RecordNotFound when trying to destroy non-existent task" do
+        expect {
+          delete :destroy, task_list_id: task_list, id: 0
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
   end
 
   private
+
   def json_response
     @json_response ||= JSON.parse(response.body)
   end
