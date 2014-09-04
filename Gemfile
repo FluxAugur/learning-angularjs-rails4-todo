@@ -23,10 +23,10 @@ group :doc do
 end
 
 group :production do
-  gem 'shelly-dependencies'
+  gem 'rails_12factor'
 end
 
-group :development, :test do
+group :test do
   gem 'rspec-rails'
   gem 'factory_girl'
 end
