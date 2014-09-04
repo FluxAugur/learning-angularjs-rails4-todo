@@ -18,6 +18,7 @@ gem 'jquery-ui-rails'
 gem 'acts_as_list'
 
 group :doc do
+  # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', '~> 0.4.0', require: false
 end
 
