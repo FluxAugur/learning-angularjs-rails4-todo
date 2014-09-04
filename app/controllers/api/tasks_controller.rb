@@ -8,8 +8,21 @@ class Api::TasksController < ApplicationController
     render nothing: true
   end
 
+  def update
+    task.update_attributes(safe_params)
+    render nothing: true
+  end
+
   private
   def task_list
     TaskList.find_by_id(params[:task_list_id])
+  end
+
+  def task
+    task_list.tasks.find_by_id(params[:id])
+  end
+
+  def safe_params
+    params.permit(:description, :priority, :completed)
   end
 end
