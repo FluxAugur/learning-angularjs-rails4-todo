@@ -1,27 +1,25 @@
 require 'rails_helper'
 
-describe TaskListsController do
-  context "for a logged-in user with a task list" do
-    let(:task_list) { create(:task_list) }
-    let(:user) { task_list.owner }
-    before { sign_in(user) }
+describe Api::TaskListsController do
+  describe "GET index" do
+    context "for user that has a task list" do
+      let(:user) { create(:user) }
 
-    describe "GET show" do
-      it "should return 200 for the task list" do
-        get :show, id: task_list.id
-        response.should be_ok
+      context "when authenticated as that user" do
+        before { sign_in(user) }
+
+        it "should return json of array of those task lists" do
+          get :index
+          tasks = JSON.parse(response.body)
+          tasks.should == [{'id' => user.task_list.id}]
+        end
       end
 
-      it "should raise RecordNotFound when task list doesn't exist" do
-        expect {
-          get :show, id: 1
-        }.to raise_error(ActiveRecord::RecordNotFound)
-      end
-
-      it "should return 404 when task list doesn't exist" do
-        expect {
-          get :show, id: 1
-        }.to raise_error(ActiveRecord::RecordNotFound)
+      it "should return error json with 401 HTTP status when not authenticated" do
+        get :index
+        tasks = JSON.parse(response.body)
+        tasks.should == {'error' => 'unauthorized'}
+        response.status.should == 401
       end
     end
   end
