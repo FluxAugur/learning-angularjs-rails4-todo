@@ -1,17 +1,17 @@
 require 'rails_helper'
 
-RSpec.describe Api::TaskListsController, :type => :controller do
+describe TaskListsController do
+  describe "GET show" do
+    it "should return 200 for existing task list" do
+      task_list = create(:task_list)
+      get :show, id: task_list.id
+      response.should be_ok
+    end
 
-  describe "GET index" do
-    context "for user that has a task list" do
-      let(:user) { create(:user) }
-      before { sign_in(user) }
-
-      it "should return json array of those task lists" do
-        get :index
-        tasks = JSON.parse(response.body)
-        tasks.should == [{'id' => user.task_list.id}]
-      end
+    it "should return 404 when task list doesn't exist" do
+      expect {
+        get :show, id: 1
+      }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end
